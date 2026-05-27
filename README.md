@@ -40,14 +40,6 @@ python -m http.server 8800
 
 Open `http://localhost:8800` in your browser.
 
-## Configuration
-
-Config lives in `.env`:
-
-- `DB_PATH`
-- `API_PORT`
-- `FRONTEND_ORIGIN`
-
 ## Project layout
 
 ```
