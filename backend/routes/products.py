@@ -17,7 +17,7 @@ def list_products(
     min_price: float | None = None,
     max_price: float | None = None,
 ):
-    sort_clause = build_sort_clause(direction, sort)
+    sort_clause = build_sort_clause(sort, direction)
     where: list[str] = []
     args: list = []
     if category is None:
@@ -27,7 +27,7 @@ def list_products(
         where.append("category_id = ?")
     if min_price is not None:
         args.append(min_price)
-        where.append("price <= ?")
+        where.append("price >= ?")
     if max_price is not None:
         args.append(max_price)
         where.append("price <= ?")
@@ -41,7 +41,7 @@ def list_products(
 @router.get("/{product_id}")
 def get_product(product_id: int):
     with get_conn() as conn:
-        row = conn.execute("SELECT * FROM categories WHERE id = ?", (product_id,)).fetchone()
+        row = conn.execute("SELECT * FROM products WHERE id = ?", (product_id,)).fetchone()
         if row is None:
             raise HTTPException(status_code=404, detail="Product not found")
         return row_to_dict(row)
@@ -60,10 +60,11 @@ def update_product(product_id: int, product: ProductCreate):
     payload["specs"] = json.dumps(payload.get("specs", {}))
     set_clauses = ", ".join(f"{k} = ?" for k in payload)
     vals = list(payload.values()) + [product_id]
+
     with get_conn() as conn:
         cur = conn.execute(
-            f"DELETE FROM products WHERE id = ? RETURNING *",
-            (product_id,),
+            f"UPDATE products SET {set_clauses} WHERE id = ? RETURNING *",
+            vals,
         )
         row = cur.fetchone()
         if row is None:

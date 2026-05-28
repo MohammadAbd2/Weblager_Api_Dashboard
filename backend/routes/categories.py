@@ -25,4 +25,4 @@ def get_category(category_id: int):
 @router.post("", status_code=201)
 def create_category(category: CategoryCreate):
     payload = category.model_dump()
-    return insert_record("products", payload)
+    return insert_record("categories", payload)
